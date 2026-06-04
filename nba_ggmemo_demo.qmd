@@ -1,0 +1,319 @@
+---
+title: "NBA ggmemo Demo — 2025-26 Season"
+subtitle: "Annotated charts built with ggplot2 + ggmemo"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: true
+    fig-width: 10
+    fig-height: 6
+    fig-dpi: 200
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(ggplot2)
+library(ggmemo)
+
+nba <- read.csv("nba_top30_2025_26.csv")
+```
+
+## Top 10 Scorers
+
+Horizontal bar chart with `annotate_callout()` highlighting Luka Dončić as scoring champ and Nikola Jokić's triple-double averages.
+
+```{r}
+#| label: fig-scorers
+#| fig-cap: "Points per game, 2025-26 regular season"
+#| fig-height: 6
+
+top10 <- nba[1:10, ]
+top10$PLAYER <- factor(top10$PLAYER, levels = rev(top10$PLAYER))
+
+small_arrow <- grid::arrow(length = grid::unit(0.12, "inches"))
+
+ggplot(top10, aes(y = PLAYER, x = PTS)) +
+  geom_col(fill = "#1D428A", width = 0.7) +
+  annotate_callout(
+    top10,
+    where = RANK == 1,
+    label = "Scoring champ",
+    position = "top-right",
+    nudge = c(2, 0.4),
+    arrow = small_arrow
+  ) +
+  annotate_callout(
+    top10,
+    where = PLAYER == "Nikola Jokić",
+    label = "Triple-double machine\n(12.9 REB, 10.7 AST)",
+    position = "top-right",
+    nudge = c(3, 0.4),
+    size = 3.5,
+    arrow = small_arrow
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
+  coord_cartesian(clip = "off") +
+  labs(y = NULL, x = "PPG") +
+  theme_minimal(base_size = 14) +
+  theme(plot.margin = margin(10, 80, 10, 10))
+```
+
+## Scoring vs Playmaking
+
+Bubble scatter plot (size = rebounds) with four `annotate_callout()` labels picking out Luka, Jokić, rookie Cooper Flagg, and Wemby's 3.1 blocks per game.
+
+```{r}
+#| label: fig-scatter
+#| fig-cap: "Points vs assists per game — bubble size is rebounds"
+#| fig-height: 7
+
+small_arrow <- grid::arrow(length = grid::unit(0.12, "inches"))
+
+ggplot(nba, aes(x = AST, y = PTS)) +
+  geom_point(aes(size = REB), alpha = 0.7, color = "#1D428A") +
+  annotate_callout(
+    nba,
+    where = PLAYER == "Nikola Jokić",
+    label = "Jokić",
+    position = "top-left",
+    nudge = c(0.8, 1.5),
+    arrow = small_arrow
+  ) +
+  annotate_callout(
+    nba,
+    where = PLAYER == "Luka Dončić",
+    label = "Luka",
+    position = "top-left",
+    nudge = c(0.8, 1.5),
+    arrow = small_arrow
+  ) +
+  annotate_callout(
+    nba,
+    where = PLAYER == "Cooper Flagg",
+    label = "Flagg (rookie)",
+    position = "bottom-left",
+    nudge = c(1.0, 2.0),
+    arrow = small_arrow
+  ) +
+  annotate_callout(
+    nba,
+    where = PLAYER == "Victor Wembanyama",
+    label = "Wemby\n(3.1 BLK)",
+    position = "top-right",
+    nudge = c(0.6, 1.5),
+    size = 3.5,
+    arrow = small_arrow
+  ) +
+  scale_size_continuous(range = c(2, 8), name = "Rebounds") +
+  labs(x = "Assists per game", y = "Points per game") +
+  theme_minimal(base_size = 14)
+```
+
+## Field Goal Efficiency
+
+`annotate_change(format = "points")` shows the 11.1 percentage-point gap between Zion Williamson (60.0%) and Jalen Johnson (48.9%).
+
+```{r}
+#| label: fig-fg-pct
+#| fig-cap: "Top 10 field goal percentage, 2025-26 regular season"
+
+fg_top <- nba[order(-nba$FG_PCT), ][1:10, ]
+fg_top$FG_PCT_100 <- fg_top$FG_PCT * 100
+fg_top$PLAYER <- factor(fg_top$PLAYER, levels = fg_top$PLAYER)
+
+fg_simple <- fg_top[, c("PLAYER", "FG_PCT_100")]
+
+ggplot(fg_top, aes(x = PLAYER, y = FG_PCT_100)) +
+  geom_col(fill = "#C8102E", width = 0.6) +
+  annotate_change(
+    fg_simple,
+    from = PLAYER == levels(fg_simple$PLAYER)[1],
+    to = PLAYER == levels(fg_simple$PLAYER)[10],
+    value = FG_PCT_100,
+    format = "points"
+  ) +
+  labs(x = NULL, y = "FG%") +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Efficiency Rating
+
+Lollipop (Cleveland dot) chart showing `annotate_callout()` works beyond bar charts. SGA is called out as 2025-26 MVP, while Luka's callout uses `colour = "#C8102E"` to highlight the efficiency gap despite leading in scoring.
+
+```{r}
+#| label: fig-efficiency
+#| fig-cap: "Efficiency rating, 2025-26 regular season"
+#| fig-height: 7
+
+nba_eff <- nba[order(-nba$EFF), ]
+nba_eff$PLAYER <- factor(nba_eff$PLAYER, levels = rev(nba_eff$PLAYER))
+
+ggplot(nba_eff[1:15, ], aes(x = EFF, y = PLAYER)) +
+  geom_segment(aes(x = 0, xend = EFF, yend = PLAYER),
+               color = "grey70", linewidth = 0.4) +
+  geom_point(size = 4, color = "#552583") +
+  annotate_callout(
+    nba_eff[1:15, ],
+    where = PLAYER == "Shai Gilgeous-Alexander",
+    label = "2025-26 MVP",
+    position = "top-right",
+    nudge = c(3, 0.5),
+    size = 3.5
+  ) +
+  annotate_callout(
+    nba_eff[1:15, ],
+    where = PLAYER == "Luka Dončić",
+    label = "Scoring champ but\nlower efficiency (33.5 PPG)",
+    position = "bottom-left",
+    nudge = c(5, 1.5),
+    size = 3.5,
+    colour = "#C8102E"
+  ) +
+  labs(
+    title = "NBA Efficiency Rating — Top 15 Players",
+    subtitle = "Points + rebounds + assists + steals + blocks - missed shots - turnovers",
+    x = "Efficiency Rating", y = NULL
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.major.y = element_blank())
+```
+
+## Three-Point Shooting
+
+Bubble scatter of 3-point attempts vs accuracy, with three `annotate_callout()` labels highlighting the volume leader, the best volume-accuracy combo (Murray), and Flagg's limited range in red.
+
+```{r}
+#| label: fig-threes
+#| fig-cap: "3-point attempts vs accuracy — bubble size is PPG"
+#| fig-height: 7
+
+small_arrow <- grid::arrow(length = grid::unit(0.12, "inches"))
+
+ggplot(nba, aes(x = FG3A, y = FG3_PCT * 100)) +
+  geom_point(aes(size = PTS), alpha = 0.6, color = "#006BB6") +
+  annotate_callout(
+    nba,
+    where = FG3A == max(nba$FG3A),
+    label = "Most 3PA/game",
+    position = "bottom-left",
+    nudge = c(0.5, 1.5),
+    arrow = small_arrow
+  ) +
+  annotate_callout(
+    nba,
+    where = PLAYER == "Jamal Murray",
+    label = "Murray: best combo\n(7.5 3PA, 43.5%)",
+    position = "top-left",
+    nudge = c(0.8, 1.5),
+    size = 3.5,
+    arrow = small_arrow
+  ) +
+  annotate_callout(
+    nba,
+    where = PLAYER == "Cooper Flagg",
+    label = "Flagg: limited range\n(3.5 3PA, 29.5%)",
+    position = "bottom-right",
+    nudge = c(0.5, 2),
+    size = 3.5,
+    colour = "#C8102E",
+    arrow = small_arrow
+  ) +
+  scale_size_continuous(range = c(2, 7), name = "PPG") +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1))) +
+  labs(
+    title = "Three-Point Shooting: Volume vs Accuracy",
+    subtitle = "Bubble size = points per game",
+    x = "3-Point Attempts per Game",
+    y = "3-Point %"
+  ) +
+  theme_minimal(base_size = 14)
+```
+
+## Top Playmakers
+
+`annotate_change(format = "absolute")` shows the raw assist gap between Jokić and SGA, while `annotate_callout()` highlights Cade Cunningham's breakout playmaking season.
+
+```{r}
+#| label: fig-assists
+#| fig-cap: "Top 10 assists per game, 2025-26 regular season"
+
+ast_top <- nba[order(-nba$AST), ][1:10, ]
+ast_top$PLAYER <- factor(ast_top$PLAYER, levels = ast_top$PLAYER)
+ast_simple <- ast_top[, c("PLAYER", "AST")]
+
+ggplot(ast_top, aes(x = PLAYER, y = AST)) +
+  geom_col(fill = "#007A33", width = 0.6) +
+  annotate_change(
+    ast_simple,
+    from = PLAYER == levels(ast_simple$PLAYER)[1],
+    to = PLAYER == levels(ast_simple$PLAYER)[10],
+    value = AST,
+    format = "absolute"
+  ) +
+  annotate_callout(
+    ast_top,
+    where = PLAYER == "Cade Cunningham",
+    label = "Most improved\nplaymaker",
+    position = "bottom-right",
+    nudge = c(0.5, 0.5),
+    size = 3.5
+  ) +
+  labs(
+    title = "Top 10 Playmakers — Assists per Game",
+    subtitle = "2025-26 regular season",
+    x = NULL, y = "APG"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Rebounding: Wemby vs Flagg
+
+Head-to-head comparison using `annotate_change(format = "percent")` for the percentage difference, combined with `annotate_callout()` on both bars.
+
+```{r}
+#| label: fig-wemby-flagg
+#| fig-cap: "Per-game rebounds, Wembanyama vs Flagg"
+
+duo <- nba[nba$PLAYER %in% c("Victor Wembanyama", "Cooper Flagg"), ]
+duo$PLAYER <- factor(duo$PLAYER, levels = c("Cooper Flagg", "Victor Wembanyama"))
+duo_simple <- duo[, c("PLAYER", "REB")]
+
+ggplot(duo, aes(x = PLAYER, y = REB)) +
+  geom_col(fill = c("#00538C", "#C4CED4"), width = 0.5) +
+  annotate_change(
+    duo_simple,
+    from = PLAYER == "Cooper Flagg",
+    to = PLAYER == "Victor Wembanyama",
+    value = REB,
+    format = "percent"
+  ) +
+  annotate_callout(
+    duo,
+    where = PLAYER == "Victor Wembanyama",
+    label = "Elite rebounder at 7'4\"",
+    position = "top-left",
+    nudge = c(0.15, 0.6)
+  ) +
+  annotate_callout(
+    duo,
+    where = PLAYER == "Cooper Flagg",
+    label = "Rookie: 6.7 RPG",
+    position = "top-left",
+    nudge = c(0.15, 0.6),
+    size = 3.5
+  ) +
+  labs(
+    title = "Rebounding: Wemby vs Flagg",
+    subtitle = "Per-game rebounds, 2025-26 season",
+    x = NULL, y = "Rebounds per Game"
+  ) +
+  theme_minimal(base_size = 14)
+```
+
+::: {.callout-note appearance="minimal"}
+Data from [stats.nba.com](https://www.nba.com/stats) — 2025-26 regular season, per-game averages.
+:::

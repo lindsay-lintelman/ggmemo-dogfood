@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NBA ggmemo Demo — 2025-26 Season</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #f8f9fa;
+    color: #1a1a2e;
+  }
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: 3px solid #1D428A;
+    padding-bottom: 0.5rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+    margin-top: 2.5rem;
+    color: #1D428A;
+  }
+  .chart {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+  .chart img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .caption {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+  code {
+    background: #e9ecef;
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+  footer {
+    margin-top: 3rem;
+    font-size: 0.8rem;
+    color: #999;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>NBA ggmemo Demo — 2025-26 Season</h1>
+<p>Three charts built with <code>ggmemo</code> on NBA stats data. Each shows a different annotation style.</p>
+
+<h2>1. Top 10 Scorers</h2>
+<div class="chart">
+  <img src="nba_chart1_scorers.png" alt="Top 10 NBA scorers bar chart">
+</div>
+<p class="caption">
+  Horizontal bar chart with <code>annotate_callout()</code> highlighting Luka Dončić as scoring champ
+  and Nikola Jokić's triple-double averages. Shows <code>coord_flip()</code> compatibility.
+</p>
+
+<h2>2. Scoring vs Playmaking</h2>
+<div class="chart">
+  <img src="nba_chart2_scatter.png" alt="Points vs assists scatter plot">
+</div>
+<p class="caption">
+  Bubble scatter plot (size = rebounds) with four <code>annotate_callout()</code> labels:
+  Luka and Jokić at the top, rookie Cooper Flagg at the bottom, and Wemby's 3.1 blocks per game.
+</p>
+
+<h2>3. Field Goal Efficiency</h2>
+<div class="chart">
+  <img src="nba_chart3_fg_pct.png" alt="FG% bar chart with change annotation">
+</div>
+<p class="caption">
+  <code>annotate_change(format = "points")</code> shows the 11.1 percentage-point gap
+  between Zion Williamson (60.0%) and Jalen Johnson (48.9%).
+</p>
+
+<footer>Data: stats.nba.com &middot; 2025-26 Regular Season &middot; Built with ggplot2 + ggmemo</footer>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# R
+Rplots.pdf
+.Rhistory
+.RData
+.Rproj.user/
+
+# Quarto render artifacts
+nba_ggmemo_demo_files/
+nba_ggmemo_demo.html
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
