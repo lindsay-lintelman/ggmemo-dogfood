@@ -17,26 +17,28 @@ ggplot(nba_eff[1:15, ], aes(x = EFF, y = PLAYER)) +
     nba_eff[1:15, ],
     where = PLAYER == "Shai Gilgeous-Alexander",
     label = "2025-26 MVP",
-    position = "top-right",
-    nudge = c(3, 0.5),
+    position = "bottom-right",
+    nudge = c(3, 0.8),
     size = 3.5
   ) +
   annotate_callout(
     nba_eff[1:15, ],
     where = PLAYER == "Luka Dončić",
-    label = "Scoring champ but\nlower efficiency (33.5 PPG)",
-    position = "bottom-left",
-    nudge = c(5, 1.5),
+    label = "Scoring champ,\nlower efficiency",
+    position = "top-right",
+    nudge = c(3, 0.8),
     size = 3.5,
     colour = "#C8102E"
   ) +
+  coord_cartesian(clip = "off") +
   labs(
     title = "NBA Efficiency Rating — Top 15 Players",
     subtitle = "Points + rebounds + assists + steals + blocks - missed shots - turnovers",
     x = "Efficiency Rating", y = NULL
   ) +
   theme_minimal(base_size = 14) +
-  theme(panel.grid.major.y = element_blank())
+  theme(panel.grid.major.y = element_blank(),
+        plot.margin = margin(10, 60, 10, 10))
 
 
 # --- Chart 5: 3-Point Volume vs Accuracy scatter -------------------------
